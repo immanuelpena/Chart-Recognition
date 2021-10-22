@@ -8,9 +8,9 @@ from faker import Faker
 from faker.providers import internet
 
 fake = Faker()
-fake.add_provider(internet)
+fake.add_provider(color)
 
-print(fake.ipv4_private())
+print(fake.country())
 
 
 fake.sentence()
