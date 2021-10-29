@@ -1,11 +1,20 @@
 import pandas as pd
 import numpy as np
 import os 
-import matplotlib
-import matplotlib.pyplot as plt
 import time
 import random
 from faker import Faker
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torchvision
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+from torchvision import datasets, models, transforms
+import copy
+
+os.mkdir('images')
 
 fake = Faker()
 
@@ -69,7 +78,7 @@ def generate_bar_chart(dimensions, measures, fake_data, num):
     stylesArray = ['bmh', 'classic', 'dark_background', 'fast', 'fivethirtyeight', 'ggplot', 'grayscale', 'seaborn-bright',
                     'seaborn-colorblind', 'seaborn-dark-palette', 'seaborn-dark', 'seaborn-darkgrid', 'seaborn-deep', 'seaborn-muted', 'seaborn-notebook', 
                     'seaborn-paper', 'seaborn-pastel', 'seaborn-poster', 'seaborn-talk', 'seaborn-ticks',
-                     'seaborn-white', 'seaborn-whitegrid', 'seaborn', 'Solarize_Light2', 'tableau-colorblind10', '_classic_test']
+                     'seaborn-white', 'seaborn-whitegrid', 'seaborn', 'Solarize_Light2', 'tableau-colorblind10']
     legendPosition = ['best','upper right','upper left', 'lower left', 'lower right','right','center left','center right','lower center','upper center','center']
     
     chart_orientation = ['bar','barh']
@@ -96,7 +105,7 @@ def generate_bar_chart(dimensions, measures, fake_data, num):
                     )
                 
         plt.legend(loc = np.random.choice(legendPosition))
-        plt.savefig(str(x) + 'bar.png', dpi=40)
+        plt.savefig('./images/' + str(x) + '_bar.png', dpi=40)
         plt.clf() 
         #plt.bar(x_values, y_values)
     # plt.show()
@@ -124,7 +133,7 @@ def generate_line_chart(dimensions, measures, fake_data, num):
     stylesArray = ['bmh', 'classic', 'dark_background', 'fast', 'fivethirtyeight', 'ggplot', 'grayscale', 'seaborn-bright',
                     'seaborn-colorblind', 'seaborn-dark-palette', 'seaborn-dark', 'seaborn-darkgrid', 'seaborn-deep', 'seaborn-muted', 'seaborn-notebook', 
                     'seaborn-paper', 'seaborn-pastel', 'seaborn-poster', 'seaborn-talk', 'seaborn-ticks',
-                     'seaborn-white', 'seaborn-whitegrid', 'seaborn', 'Solarize_Light2', 'tableau-colorblind10', '_classic_test']
+                     'seaborn-white', 'seaborn-whitegrid', 'seaborn', 'Solarize_Light2', 'tableau-colorblind10']
      
     fake_data = pd.DataFrame(fake_data) 
 
@@ -155,7 +164,7 @@ def generate_line_chart(dimensions, measures, fake_data, num):
         plt.legend(loc = np.random.choice(legendPosition))        
      
         #ax.legend(loc = np.random.choice(legendPosition))
-        plt.savefig(str(x) + 'line.png', dpi=40)
+        plt.savefig('./images/' + str(x) + '_line.png', dpi=40)
         plt.clf() 
         #plt.bar(x_values, y_values)
     # plt.show()
@@ -181,7 +190,7 @@ def generate_pie_chart(dimensions, measures, fake_data, num):
     stylesArray = ['bmh', 'classic', 'dark_background', 'fast', 'fivethirtyeight', 'ggplot', 'grayscale', 'seaborn-bright',
                     'seaborn-colorblind', 'seaborn-dark-palette', 'seaborn-dark', 'seaborn-darkgrid', 'seaborn-deep', 'seaborn-muted', 'seaborn-notebook', 
                     'seaborn-paper', 'seaborn-pastel', 'seaborn-poster', 'seaborn-talk', 'seaborn-ticks',
-                     'seaborn-white', 'seaborn-whitegrid', 'seaborn', 'Solarize_Light2', 'tableau-colorblind10', '_classic_test']
+                     'seaborn-white', 'seaborn-whitegrid', 'seaborn', 'Solarize_Light2', 'tableau-colorblind10']
     legendPosition = ['best','upper right','upper left', 'lower left', 'lower right','right','center left','center right','lower center','upper center','center']
     
     chart_axis = ['Company','Country','WorkerStatus']
@@ -205,7 +214,7 @@ def generate_pie_chart(dimensions, measures, fake_data, num):
                 )
         plt.title(fake.sentence())
         #plt.legend(loc = np.random.choice(legendPosition))
-        plt.savefig(str(x) + 'pie.png', dpi=40)
+        plt.savefig('./images/' + str(x) + '_pie.png', dpi=40)
         plt.clf() 
         #plt.bar(x_values, y_values)
     # plt.show()
@@ -231,7 +240,7 @@ def generate_scatter_chart(dimensions, measures, fake_data, num):
     stylesArray = ['bmh', 'classic', 'dark_background', 'fast', 'fivethirtyeight', 'ggplot', 'grayscale', 'seaborn-bright',
                     'seaborn-colorblind', 'seaborn-dark-palette', 'seaborn-dark', 'seaborn-darkgrid', 'seaborn-deep', 'seaborn-muted', 'seaborn-notebook', 
                     'seaborn-paper', 'seaborn-pastel', 'seaborn-poster', 'seaborn-talk', 'seaborn-ticks',
-                     'seaborn-white', 'seaborn-whitegrid', 'seaborn', 'Solarize_Light2', 'tableau-colorblind10', '_classic_test']
+                     'seaborn-white', 'seaborn-whitegrid', 'seaborn', 'Solarize_Light2', 'tableau-colorblind10']
     legendPosition = ['best','upper right','upper left', 'lower left', 'lower right','right','center left','center right','lower center','upper center','center']
     colormapArray = ['viridis', 'plasma', 'inferno', 'magma', 'cividis'] 
     
@@ -257,7 +266,7 @@ def generate_scatter_chart(dimensions, measures, fake_data, num):
                               colormap= random.choice(colormapArray),
                               title = fake.sentence()
                               )
-        plt.savefig(str(x) + 'scatter.png', dpi=40)
+        plt.savefig('./images/' + str(x) + '_scatter.png', dpi=40)
         plt.clf() 
         #plt.bar(x_values, y_values)
     # plt.show()
@@ -267,3 +276,297 @@ fig = generate_scatter_chart(dimensions, measures, fake_data, num = 1000)
 
 
 print("--- %s seconds ---" % (time.time() - start_time))
+
+
+
+import os
+import numpy as np
+import substring
+path = './images'
+
+files = os.listdir(path)
+
+filesArray = []
+
+for f in files:
+	filesArray.append(f)
+ 
+filesArray = np.array(filesArray)
+
+df = pd.DataFrame(data=filesArray, columns=["FileName"])
+
+df['clase'] = df.apply(lambda x: substring.substringByChar(x['FileName'], startChar="_", endChar="."),axis=1)
+df['clase'] = df['clase'].str.replace('_','')
+df['clase'] = df['clase'].str.replace('.','')
+
+print(df)
+
+
+import pandas as pd
+import math
+import random
+import os
+import shutil
+
+
+random.seed(30)
+
+
+classes = df["clase"].unique()
+classesFinal = [cl.replace(' ', '_') for cl in classes]
+print(classesFinal)
+
+try:
+  os.mkdir('dataset')
+except OSError:
+  print ("No se pudo crear folder dataset")
+else:
+  print ("Se creó folder dataset")
+
+try:
+  os.mkdir('dataset/train')
+except OSError:
+  print ("No se pudo crear folder dataset")
+else:
+  print ("Se creó folder dataset")
+
+try:
+  os.mkdir('dataset/test')
+except OSError:
+  print ("No se pudo crear folder dataset")
+else:
+  print ("Se creó folder dataset")
+
+try:
+  os.mkdir('dataset/val')
+except OSError:
+  print ("No se pudo crear folder dataset")
+else:
+  print ("Se creó folder dataset")
+
+for cl in classesFinal:
+  try:
+    os.mkdir(os.path.join('dataset', "train", cl))
+  except OSError:
+    print (f"No se pudo crear folder train {cl}")
+  else:
+    print (f"Se creó folder train {cl}")
+  
+  try:
+    os.mkdir(os.path.join('dataset', "test", cl))
+  except OSError:
+    print (f"No se pudo crear folder test {cl}")
+  else:
+    print (f"Se creó folder test {cl}")
+  
+  try:
+    os.mkdir(os.path.join('dataset', "val", cl))
+  except OSError:
+    print (f"No se pudo crear folder val {cl}")
+  else:
+    print (f"Se creó folder val {cl}")
+
+
+
+train_df = df.sample(frac=0.7,random_state=200)
+train_df.columns = ["imagen", "clase"]
+train_df.reset_index
+
+val_df = df.sample(frac=0.3,random_state=200)
+val_df.columns = ["imagen", "clase"]
+val_df.reset_index
+
+test_df =df
+test_df.columns = ["imagen", "clase"]
+
+dataset = dict()
+
+
+pathTrain = './dataset/train/'
+pathSource = './images/'
+
+#Copiar archivos de train
+for index, elem in train_df.iterrows():
+    imagen = elem['imagen']
+    clase = elem['clase']
+    shutil.copy(os.path.join(pathSource,imagen), os.path.join(pathTrain , clase ,imagen))
+
+
+
+pathTest = './dataset/test/'
+pathSource = './images/'
+
+#Copiar archivos de test
+for index, elem in test_df.iterrows():
+    imagen = elem['imagen']
+    clase = elem['clase']
+    shutil.copy(os.path.join(pathSource,imagen), os.path.join(pathTest, clase ,imagen))
+
+
+
+pathVal = './dataset/val/'
+pathSource = './images/'
+
+#Copiar archivos de validacion
+for index, elem in val_df.iterrows():
+    imagen = elem['imagen']
+    clase = elem['clase']
+    shutil.copy(os.path.join(pathSource,imagen), os.path.join(pathVal, clase ,imagen))
+
+
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torchvision
+import numpy as np
+import matplotlib.pyplot as plt
+from torchvision import datasets, models, transforms
+import time
+import os
+import copy
+
+pathDataset = 'dataset/'
+
+train_dataset = torchvision.datasets.ImageFolder(pathDataset + 'train', 
+                                                    transform = transforms.Compose([
+                                                        transforms.RandomVerticalFlip(),
+                                                        transforms.RandomHorizontalFlip(),
+                                                        transforms.RandomResizedCrop(224),
+                                                                    transforms.ToTensor(),
+                                                                    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                                                        std = [0.229, 0.224, 0.225])]))
+
+val_dataset = torchvision.datasets.ImageFolder(pathDataset + 'val',
+                                                    transform = transforms.Compose([ transforms.Resize(256),
+                                                                    transforms.CenterCrop(224),
+                                                                    transforms.ToTensor(),
+                                                                    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                                                        std = [0.229, 0.224, 0.225])]))
+
+test_dataset = torchvision.datasets.ImageFolder(pathDataset + 'test',
+                                                    transform = transforms.Compose([ transforms.Resize(224),
+                                                                    transforms.ToTensor(),
+                                                                    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                                                        std = [0.229, 0.224, 0.225])]))
+
+train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32,shuffle=True)
+val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=32, shuffle=True)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=True)
+
+class_names = train_dataset.classes
+
+device = ('cuda' if torch.cuda.is_available() else 'cpu')
+
+def train_model(model, criterion, optimizer, num_epochs=10):
+    best_model_wts = copy.deepcopy(model.state_dict())
+    best_acc = 0.0
+
+    for epoch in range(num_epochs):
+        print(f'Epoch {epoch}/{num_epochs-1}')
+        print('-' * 10)
+
+        model.train()
+
+        running_loss = 0.0
+        running_corrects = 0.0
+
+        for inputs, labels in train_loader:
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            optimizer.zero_grad()
+
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+            loss = criterion(outputs, labels)
+
+            loss.backward()
+            optimizer.step()
+
+            running_loss += loss.item() * inputs.size(0)
+            running_corrects += torch.sum(preds ==  labels.data)
+        
+        epoch_loss = running_loss / len(train_dataset)
+        epoch_acc = running_corrects.double() / len(train_dataset)
+
+        print('Train Loss: {:.4f}  Acc: {:.4f}'.format(epoch_loss, epoch_acc))
+
+        #Validation
+        model.eval()
+        running_loss = 0.0
+        running_corrects = 0.0
+
+        for inputs, labels in val_loader:
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            with torch.set_grad_enabled(False):
+                outputs = model(inputs)
+                _, preds = torch.max(outputs, 1)
+                loss = criterion(outputs, labels)
+            
+            running_loss += loss.item() * inputs.size(0)
+            running_corrects += torch.sum(preds == labels.data)
+
+        epoch_loss = running_loss / len(val_dataset)
+        epoch_acc = running_corrects / len(val_dataset)
+        print('Val Loss: {:.4f}  Acc: {:.4f}'.format(epoch_loss, epoch_acc))
+
+        if epoch_acc > best_acc:
+            best_acc = epoch_acc
+            best_model_wts = copy.deepcopy(model.state_dict())
+    
+    print('Best accuracy: {:.4f}'.format(best_acc))
+
+    model.load_state_dict(best_model_wts)
+
+    return model
+
+def test_model(model, criterion):
+  model.eval()
+  running_loss = 0.0
+  running_corrects = 0.0
+
+  for inputs, labels in test_loader:
+    inputs = inputs.to(device)
+    labels = labels.to(device)
+
+    with torch.set_grad_enabled(False):
+        outputs = model(inputs)
+        _, preds = torch.max(outputs, 1)
+        loss = criterion(outputs, labels)
+            
+        running_loss += loss.item() * inputs.size(0)
+        running_corrects += torch.sum(preds == labels.data)
+
+  epoch_loss = running_loss / len(test_dataset)
+  epoch_acc = running_corrects / len(test_dataset)
+  print('Test Loss: {:.4f}  Acc: {:.4f}'.format(epoch_loss, epoch_acc))
+
+
+
+#Usamos un modelo pre-entrenado ResNet18 con dataset Imagenet
+model_ft = models.resnet18(pretrained=True)
+
+#Vamos a cambiar la última capa de la red. La red original fur entrenada con 
+# 1000 clases. Ahora solo necesitamos 6 neuronas de salida.
+# Cambiamos la arquitectura final de la red
+
+num_ft = model_ft.fc.in_features
+model_ft.fc = nn.Linear(num_ft, 6)
+
+model_ft = model_ft.to(device)
+criterion = nn.CrossEntropyLoss()
+
+#La red original fue entrenada con SGD y un lr inicial de 0.1, el cual decrementaba cada vez que el 
+# error se estancaba. Nosotros partimos con SGD y un lr bajo, dado que solo queremos tunear la red
+# para el nuevo problema
+
+optimizer = torch.optim.SGD(model_ft.parameters(), lr = 0.001, momentum=0.9)
+
+# Empezamos con un número de épocas bajo. A más épocas podemos mejorar el performance
+model_ft = train_model(model_ft, criterion, optimizer, num_epochs=30)
+
+#Guardamos la mejor red, en términos de accuracy de validación
+torch.save(model_ft.state_dict(), 'resnet18_finetuned.pth')
